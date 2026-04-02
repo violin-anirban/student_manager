@@ -57,7 +57,7 @@ const connections = [
 
 // Skip-tier connections (drawn with offset arc so they bypass intermediate nodes)
 const skipTierLinks = [
-  { from: 'skdc', to: 'anirban', offsetX: -60 },  // SKDC → Anirban
+  { from: 'skdc', to: 'anirban', offsetX: -100 },  // SKDC → Anirban
   { from: 'vgj',  to: 'brc',    offsetX: 50 },    // VGJ → BRC
 ];
 

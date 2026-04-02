@@ -25,6 +25,11 @@ export default function UserPage() {
   const [latestClassSchedule, setLatestClassSchedule] = useState(null);
   const [lastPayment, setLastPayment] = useState(null);
 
+  const [allClassRequests, setAllClassRequests] = useState([]);
+  const [allCreditRequests, setAllCreditRequests] = useState([]);
+  const [creditSearch, setCreditSearch] = useState("");
+  const [classSearch, setClassSearch] = useState("");
+
   /* ---------------- FETCH USER + NOTICE ---------------- */
   useEffect(() => {
     if (!uid) return;
@@ -72,14 +77,13 @@ export default function UserPage() {
     if (!uid) return;
 
     const fetchLatestClass = async () => {
-      const { data } = await supabase
+      const { data: allData } = await supabase
         .from("classesRequests")
         .select("*")
         .eq("uid", uid)
-        .order("createdAtClient", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      setLatestClassSchedule(data || null);
+        .order("createdAtClient", { ascending: false });
+      setAllClassRequests(allData || []);
+      setLatestClassSchedule(allData?.[0] || null);
     };
 
     fetchLatestClass();
@@ -110,10 +114,9 @@ export default function UserPage() {
       .select("*")
       .eq("targetUserId", uid)
       .order("createdAt", { ascending: false })
-      .limit(1)
-      .maybeSingle()
       .then(({ data }) => {
-        if (data) setLastPayment(data);
+        setAllCreditRequests(data || []);
+        if (data?.[0]) setLastPayment(data[0]);
       });
   }, [uid]);
 
@@ -173,7 +176,7 @@ export default function UserPage() {
           <div className="absolute inset-0 bg-[#0c0905]/80 backdrop-blur-sm" />
         </div>
 
-        <section className="relative z-10 max-w-4xl mx-auto space-y-6 sm:space-y-8 md:space-y-10 animate-fade-up">
+        <section className="relative z-10 max-w-4xl lg:max-w-6xl mx-auto space-y-6 sm:space-y-8 md:space-y-10 animate-fade-up">
           <div className="text-center">
             <p className="text-[10px] tracking-[0.24em] uppercase text-[#b8922a] font-medium mb-3 flex items-center justify-center gap-2.5">
               <span className="w-5 h-px bg-[#b8922a] inline-block"></span>Dashboard
@@ -235,6 +238,133 @@ export default function UserPage() {
               <p>Method: {lastPayment.paymentMethod}</p>
             </Card>
           )}
+
+          {/* History: Side by side on lg, stacked on mobile */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Class Request History */}
+            <Card title="Class Request History">
+              {allClassRequests.length === 0 ? (
+                <p>No class requests yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="Search by date, time, status..."
+                    value={classSearch}
+                    onChange={(e) => setClassSearch(e.target.value)}
+                    className="w-full p-2.5 rounded-sm bg-[#0c0905] text-[#f5efe4] border border-[#b8922a]/20 focus:outline-none focus:ring-1 focus:ring-[#b8922a]/50 text-sm placeholder-[#f5efe4]/30"
+                  />
+                  <div className="max-h-[400px] overflow-y-auto space-y-3 pr-1">
+                    {allClassRequests
+                      .filter((r) => {
+                        if (!classSearch) return true;
+                        const q = classSearch.toLowerCase();
+                        return (
+                          (r.date ?? "").toLowerCase().includes(q) ||
+                          (r.time ?? "").toLowerCase().includes(q) ||
+                          (r.status ?? "").toLowerCase().includes(q) ||
+                          (r.createdAtClient ? new Date(r.createdAtClient).toLocaleString().toLowerCase().includes(q) : false)
+                        );
+                      })
+                      .map((r) => (
+                      <div
+                        key={r.id}
+                        className="bg-[#0c0905] border border-[#b8922a]/10 p-3 rounded-sm"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                          <div>
+                            <p className="text-[#f5efe4] text-sm font-medium">
+                              {r.date} at {r.time}
+                            </p>
+                            <p className="text-xs text-[#f5efe4]/30">
+                              Submitted: {r.createdAtClient ? new Date(r.createdAtClient).toLocaleString() : "N/A"}
+                            </p>
+                          </div>
+                          <span
+                            className={`text-xs font-medium tracking-wider uppercase px-2 py-1 rounded-sm w-fit ${
+                              r.status === "approved"
+                                ? "bg-green-900/40 text-green-400 border border-green-700/30"
+                                : r.status === "declined"
+                                ? "bg-red-900/40 text-red-400 border border-red-700/30"
+                                : "bg-yellow-900/40 text-yellow-400 border border-yellow-700/30"
+                            }`}
+                          >
+                            {r.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </Card>
+
+            {/* Credit Request History */}
+            <Card title="Credit Request History">
+              {allCreditRequests.length === 0 ? (
+                <p>No credit requests yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="Search by status, method, txn number..."
+                    value={creditSearch}
+                    onChange={(e) => setCreditSearch(e.target.value)}
+                    className="w-full p-2.5 rounded-sm bg-[#0c0905] text-[#f5efe4] border border-[#b8922a]/20 focus:outline-none focus:ring-1 focus:ring-[#b8922a]/50 text-sm placeholder-[#f5efe4]/30"
+                  />
+                  <div className="max-h-[400px] overflow-y-auto space-y-3 pr-1">
+                    {allCreditRequests
+                      .filter((r) => {
+                        if (!creditSearch) return true;
+                        const q = creditSearch.toLowerCase();
+                        return (
+                          (r.status ?? "").toLowerCase().includes(q) ||
+                          (r.paymentMethod ?? "").toLowerCase().includes(q) ||
+                          (r.proof ?? "").toLowerCase().includes(q) ||
+                          (r.message ?? "").toLowerCase().includes(q) ||
+                          String(r.amount).includes(q) ||
+                          (r.createdAt ? new Date(r.createdAt).toLocaleString().toLowerCase().includes(q) : false)
+                        );
+                      })
+                      .map((r) => (
+                      <div
+                        key={r.id}
+                        className="bg-[#0c0905] border border-[#b8922a]/10 p-3 rounded-sm"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                          <div>
+                            <p className="text-[#f5efe4] text-sm font-medium">
+                              {r.amount} {r.amount == 1 ? "class" : "classes"}
+                            </p>
+                            <p className="text-xs text-[#f5efe4]/40">
+                              Method: {r.paymentMethod} | Txn: {r.proof}
+                            </p>
+                            {r.message && (
+                              <p className="text-xs text-[#f5efe4]/30">Message: {r.message}</p>
+                            )}
+                            <p className="text-xs text-[#f5efe4]/30">
+                              Submitted: {r.createdAt ? new Date(r.createdAt).toLocaleString() : "N/A"}
+                            </p>
+                          </div>
+                          <span
+                            className={`text-xs font-medium tracking-wider uppercase px-2 py-1 rounded-sm w-fit ${
+                              r.status === "approved"
+                                ? "bg-green-900/40 text-green-400 border border-green-700/30"
+                                : r.status === "declined"
+                                ? "bg-red-900/40 text-red-400 border border-red-700/30"
+                                : "bg-yellow-900/40 text-yellow-400 border border-yellow-700/30"
+                            }`}
+                          >
+                            {r.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </Card>
+          </div>
         </section>
 
         {showSchedulePopup && (

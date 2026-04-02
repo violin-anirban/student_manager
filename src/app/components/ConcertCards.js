@@ -75,8 +75,20 @@ export default function ConcertCard({
         )}
       </div>
 
-      {/* Right: Date */}
-      <span className="text-[12px] text-[#b8922a] shrink-0">{fullDate}</span>
+      {/* Right: Date & Ticket */}
+      <div className="flex items-center gap-3 shrink-0">
+        <span className="text-[12px] text-[#b8922a]">{fullDate}</span>
+        {ticketURL && (
+          <a
+            href={ticketURL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1 text-[11px] tracking-[0.12em] uppercase font-medium border border-[#b8922a] text-[#b8922a] hover:bg-[#b8922a] hover:text-[#0c0905] transition-all duration-200"
+          >
+            Tickets
+          </a>
+        )}
+      </div>
     </div>
   );
 }

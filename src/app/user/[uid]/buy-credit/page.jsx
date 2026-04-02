@@ -59,6 +59,7 @@ export default function BuyCreditPage() {
       if (data) {
         setClassFee(data.classFee || "00");
         setCurrency(data.currency || "INR");
+        console.log("Fetched class fee:", data.classFee, "Currency:", data.currency);
       }
     };
     fetchClassFee();

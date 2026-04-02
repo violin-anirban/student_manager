@@ -214,8 +214,11 @@ export default function AdminDashboard() {
     <>
       <Navbar />
       <div className="relative min-h-screen bg-[#0c0905] text-[#f5efe4] flex flex-col items-center py-20 sm:py-16 px-4 sm:px-6">
-        <div className="absolute inset-0 bg-[url('/background.jpg')] bg-cover bg-center opacity-15"></div>
-        <div className="relative z-10 w-full max-w-5xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1209] via-[#0c0905] to-[#0d0f05] opacity-100">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(184,146,42,0.08)_0%,_transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(184,146,42,0.05)_0%,_transparent_50%)]" />
+        </div>
+        <div className="relative z-10 w-full max-w-5xl lg:max-w-6xl">
 
           <p className="text-[10px] tracking-[0.24em] uppercase text-[#b8922a] font-medium mb-3 flex items-center justify-center gap-2.5">
             <span className="w-5 h-px bg-[#b8922a] inline-block"></span>Administration
@@ -245,114 +248,123 @@ export default function AdminDashboard() {
             </button>
           </div>
 
-          {/* Class Requests */}
-          <section className="bg-[#1a1209] border border-[#b8922a]/10 p-4 sm:p-6 rounded-sm mb-6 sm:mb-10">
-            <h2 className="font-[family-name:var(--font-cormorant)] text-xl sm:text-2xl font-light italic mb-3 sm:mb-4 text-[#b8922a]">
-              Pending Class Requests ({classRequests.length})
-            </h2>
-            {classRequests.length === 0 ? (
-              <p className="text-[#f5efe4]/40 italic text-sm sm:text-base">No pending requests.</p>
-            ) : (
-              <div className="space-y-3 sm:space-y-4">
-                {classRequests.map((r) => (
-                  <div
-                    key={r.id}
-                    className="bg-[#0c0905] border border-[#b8922a]/10 p-3 sm:p-4 rounded-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 transition-all hover:border-[#b8922a]/25"
-                  >
-                    <div>
-                      <p className="font-medium text-[#f5efe4] text-sm sm:text-base">{r.displayName}</p>
-                      <p className="text-sm text-[#f5efe4]/50">
-                        Date: {r.date} | Time: {r.time}
-                      </p>
+          {/* Pending Requests: Side by side on lg */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 sm:mb-10">
+            {/* Class Requests */}
+            <section className="bg-[#1a1209] border border-[#b8922a]/10 p-4 sm:p-6 rounded-sm">
+              <h2 className="font-[family-name:var(--font-cormorant)] text-xl sm:text-2xl font-light italic mb-3 sm:mb-4 text-[#b8922a]">
+                Pending Class Requests ({classRequests.length})
+              </h2>
+              {classRequests.length === 0 ? (
+                <p className="text-[#f5efe4]/40 italic text-sm sm:text-base">No pending requests.</p>
+              ) : (
+                <div className="max-h-[450px] overflow-y-auto space-y-3 sm:space-y-4 pr-1">
+                  {classRequests.map((r) => (
+                    <div
+                      key={r.id}
+                      className="bg-[#0c0905] border border-[#b8922a]/10 p-3 sm:p-4 rounded-sm flex flex-col gap-3 transition-all hover:border-[#b8922a]/25"
+                    >
+                      <div>
+                        <p className="font-medium text-[#f5efe4] text-sm sm:text-base">{r.displayName}</p>
+                        <p className="text-sm text-[#f5efe4]/50">
+                          Date: {r.date} | Time: {r.time}
+                        </p>
+                        <p className="text-xs text-[#f5efe4]/30">
+                          Submitted: {r.createdAtClient ? new Date(r.createdAtClient).toLocaleString() : "N/A"}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => approveRequest("classesRequests", r.id)}
+                          disabled={isProcessing("classesRequests", r.id)}
+                          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm font-medium hover:cursor-pointer text-[10px] sm:text-xs tracking-[0.1em] uppercase ${
+                            isProcessing("classesRequests", r.id)
+                              ? "bg-[#f5efe4]/10 text-[#f5efe4]/30"
+                              : "bg-[#b8922a] text-[#0c0905] hover:bg-[#d4aa4a]"
+                          } transition-colors`}
+                        >
+                          {isProcessing("classesRequests", r.id) ? "Processing..." : "Approve"}
+                        </button>
+                        <button
+                          onClick={() => declineRequest("classesRequests", r.id)}
+                          disabled={isProcessing("classesRequests", r.id)}
+                          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm font-medium hover:cursor-pointer text-[10px] sm:text-xs tracking-[0.1em] uppercase ${
+                            isProcessing("classesRequests", r.id)
+                              ? "bg-[#f5efe4]/10 text-[#f5efe4]/30"
+                              : "border border-[#f5efe4]/20 text-[#f5efe4]/60 hover:border-[#f5efe4]/40"
+                          } transition-colors`}
+                        >
+                          Decline
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => approveRequest("classesRequests", r.id)}
-                        disabled={isProcessing("classesRequests", r.id)}
-                        className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm font-medium hover:cursor-pointer text-[10px] sm:text-xs tracking-[0.1em] uppercase ${
-                          isProcessing("classesRequests", r.id)
-                            ? "bg-[#f5efe4]/10 text-[#f5efe4]/30"
-                            : "bg-[#b8922a] text-[#0c0905] hover:bg-[#d4aa4a]"
-                        } transition-colors`}
-                      >
-                        {isProcessing("classesRequests", r.id) ? "Processing..." : "Approve"}
-                      </button>
-                      <button
-                        onClick={() => declineRequest("classesRequests", r.id)}
-                        disabled={isProcessing("classesRequests", r.id)}
-                        className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm font-medium hover:cursor-pointer text-[10px] sm:text-xs tracking-[0.1em] uppercase ${
-                          isProcessing("classesRequests", r.id)
-                            ? "bg-[#f5efe4]/10 text-[#f5efe4]/30"
-                            : "border border-[#f5efe4]/20 text-[#f5efe4]/60 hover:border-[#f5efe4]/40"
-                        } transition-colors`}
-                      >
-                        Decline
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+                  ))}
+                </div>
+              )}
+            </section>
 
-          {/* Credit Requests */}
-          <section className="bg-[#1a1209] border border-[#b8922a]/10 p-4 sm:p-6 rounded-sm mb-6 sm:mb-10">
-            <h2 className="font-[family-name:var(--font-cormorant)] text-xl sm:text-2xl font-light italic mb-3 sm:mb-4 text-[#b8922a]">
-              Pending Credit Requests ({creditRequests.length})
-            </h2>
-            {creditRequests.length === 0 ? (
-              <p className="text-[#f5efe4]/40 italic text-sm sm:text-base">No pending requests.</p>
-            ) : (
-              <div className="space-y-3 sm:space-y-4">
-                {creditRequests.map((r) => (
-                  <div
-                    key={r.id}
-                    className="bg-[#0c0905] border border-[#b8922a]/10 p-3 sm:p-4 rounded-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 transition-all hover:border-[#b8922a]/25"
-                  >
-                    <div className="space-y-0.5">
-                      <p className="font-medium text-[#f5efe4] text-sm sm:text-base">{r.displayName}</p>
-                      <p className="text-sm text-[#f5efe4]/50">
-                        {r.amount} classes
-                      </p>
-                      <p className="text-sm text-[#f5efe4]/40">
-                        Payment Method: {r.paymentMethod}
-                      </p>
-                      <p className="text-sm text-[#f5efe4]/40">
-                        Transaction Proof: {r.proof}
-                      </p>
-                      <p className="text-sm text-[#f5efe4]/40">
-                        Additional Message: {r.message || "N/A"}
-                      </p>
+            {/* Credit Requests */}
+            <section className="bg-[#1a1209] border border-[#b8922a]/10 p-4 sm:p-6 rounded-sm">
+              <h2 className="font-[family-name:var(--font-cormorant)] text-xl sm:text-2xl font-light italic mb-3 sm:mb-4 text-[#b8922a]">
+                Pending Credit Requests ({creditRequests.length})
+              </h2>
+              {creditRequests.length === 0 ? (
+                <p className="text-[#f5efe4]/40 italic text-sm sm:text-base">No pending requests.</p>
+              ) : (
+                <div className="max-h-[450px] overflow-y-auto space-y-3 sm:space-y-4 pr-1">
+                  {creditRequests.map((r) => (
+                    <div
+                      key={r.id}
+                      className="bg-[#0c0905] border border-[#b8922a]/10 p-3 sm:p-4 rounded-sm flex flex-col gap-3 transition-all hover:border-[#b8922a]/25"
+                    >
+                      <div className="space-y-0.5">
+                        <p className="font-medium text-[#f5efe4] text-sm sm:text-base">{r.displayName}</p>
+                        <p className="text-sm text-[#f5efe4]/50">
+                          {r.amount} classes
+                        </p>
+                        <p className="text-sm text-[#f5efe4]/40">
+                          Payment Method: {r.paymentMethod}
+                        </p>
+                        <p className="text-sm text-[#f5efe4]/40">
+                          Transaction Proof: {r.proof}
+                        </p>
+                        <p className="text-sm text-[#f5efe4]/40">
+                          Additional Message: {r.message || "N/A"}
+                        </p>
+                        <p className="text-xs text-[#f5efe4]/30">
+                          Submitted: {r.createdAt ? new Date(r.createdAt).toLocaleString() : "N/A"}
+                        </p>
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <button
+                          onClick={() => approveRequest("creditRequests", r.id)}
+                          disabled={isProcessing("creditRequests", r.id)}
+                          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm hover:cursor-pointer font-medium text-[10px] sm:text-xs tracking-[0.1em] uppercase ${
+                            isProcessing("creditRequests", r.id)
+                              ? "bg-[#f5efe4]/10 text-[#f5efe4]/30"
+                              : "bg-[#b8922a] text-[#0c0905] hover:bg-[#d4aa4a]"
+                          } transition-colors`}
+                        >
+                          {isProcessing("creditRequests", r.id) ? "Processing..." : "Approve"}
+                        </button>
+                        <button
+                          onClick={() => declineRequest("creditRequests", r.id)}
+                          disabled={isProcessing("creditRequests", r.id)}
+                          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm hover:cursor-pointer font-medium text-[10px] sm:text-xs tracking-[0.1em] uppercase ${
+                            isProcessing("creditRequests", r.id)
+                              ? "bg-[#f5efe4]/10 text-[#f5efe4]/30"
+                              : "border border-[#f5efe4]/20 text-[#f5efe4]/60 hover:border-[#f5efe4]/40"
+                          } transition-colors`}
+                        >
+                          Decline
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-2 shrink-0">
-                      <button
-                        onClick={() => approveRequest("creditRequests", r.id)}
-                        disabled={isProcessing("creditRequests", r.id)}
-                        className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm hover:cursor-pointer font-medium text-[10px] sm:text-xs tracking-[0.1em] uppercase ${
-                          isProcessing("creditRequests", r.id)
-                            ? "bg-[#f5efe4]/10 text-[#f5efe4]/30"
-                            : "bg-[#b8922a] text-[#0c0905] hover:bg-[#d4aa4a]"
-                        } transition-colors`}
-                      >
-                        {isProcessing("creditRequests", r.id) ? "Processing..." : "Approve"}
-                      </button>
-                      <button
-                        onClick={() => declineRequest("creditRequests", r.id)}
-                        disabled={isProcessing("creditRequests", r.id)}
-                        className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm hover:cursor-pointer font-medium text-[10px] sm:text-xs tracking-[0.1em] uppercase ${
-                          isProcessing("creditRequests", r.id)
-                            ? "bg-[#f5efe4]/10 text-[#f5efe4]/30"
-                            : "border border-[#f5efe4]/20 text-[#f5efe4]/60 hover:border-[#f5efe4]/40"
-                        } transition-colors`}
-                      >
-                        Decline
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
 
           {/* Students */}
           <section className="bg-[#1a1209] border border-[#b8922a]/10 p-4 sm:p-6 rounded-sm">
@@ -367,7 +379,7 @@ export default function AdminDashboard() {
             {filteredStudents.length === 0 ? (
               <p className="text-[#f5efe4]/40 italic text-sm sm:text-base">No students found.</p>
             ) : (
-              <div className="space-y-3 sm:space-y-4">
+              <div className="max-h-[500px] overflow-y-auto space-y-3 sm:space-y-4 pr-1">
                 {filteredStudents.map((s) => (
                   <div
                     key={s.id}
