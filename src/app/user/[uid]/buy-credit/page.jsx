@@ -20,8 +20,8 @@ export default function BuyCreditPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!amount || !paymentMethod || !proof) {
-      alert("Please fill all fields.");
-      return;
+      alert("fill all fields.");
+      return;Please 
     }
 
     try {
@@ -120,6 +120,9 @@ export default function BuyCreditPage() {
                 placeholder="Paste your transaction number"
                 value={proof}
                 onChange={(e) => setProof(e.target.value)}
+                onInvalid={(e) => e.target.setCustomValidity("Transaction Proof is Mandatory.")}
+                onInput={(e) => e.target.setCustomValidity("")}
+                required
                 className="p-2.5 sm:p-3 rounded-sm bg-[#0c0905] border border-[#b8922a]/20 text-[#f5efe4] focus:ring-1 focus:ring-[#b8922a]/50 focus:outline-none text-sm sm:text-base"
               />
 
@@ -127,7 +130,7 @@ export default function BuyCreditPage() {
                 placeholder="Additional message (optional)"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="p-2.5 sm:p-3 rounded-sm bg-[#0c0905] border border-[#b8922a]/20 text-[#f5efe4] focus:ring-1 focus:ring-[#b8922a]/50 focus:outline-none resize-y text-sm sm:text-base"
+                className="p-2.5 sm:p-3 rounded-sUpaym bg-[#0c0905] border border-[#b8922a]/20 text-[#f5efe4] focus:ring-1 focus:ring-[#b8922a]/50 focus:outline-none resize-y text-sm sm:text-base"
               ></textarea>
 
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -152,11 +155,11 @@ export default function BuyCreditPage() {
               {paymentMethod === "UPI" && (
                 <div className="text-center">
                   <h2 className="font-[family-name:var(--font-cormorant)] text-lg sm:text-xl font-light italic mb-3 text-[#b8922a]">
-                    Scan QR to Pay via Upay
+                    Scan QR to Pay via UPI
                   </h2>
                   <Image
                     src="/qr_code.jpeg"
-                    alt="Upay QR Code"
+                    alt="UPI QR Code"
                     width={250}
                     height={250}
                     className="mx-auto rounded-sm"

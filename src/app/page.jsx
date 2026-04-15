@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "./navbar/navbar";
 import ConcertCard from "./components/ConcertCards";
 import { supabase } from "./supabaseConfig";
@@ -47,11 +48,29 @@ const formatDate = (date) => {
 };
 
 export default function Portfolio() {
+  const router = useRouter();
   const [concerts, setConcerts] = useState([]);
   const [pastConcerts, setPastConcerts] = useState([]);
   const [videos, setVideos] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const hasOAuthParams =
+      typeof window !== "undefined" &&
+      (window.location.hash.includes("access_token") ||
+        window.location.search.includes("code="));
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "SIGNED_IN" && session?.user && hasOAuthParams) {
+          router.replace(`/user/${session.user.id}`);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [router]);
 
   useEffect(() => {
     const fetchConcerts = async () => {

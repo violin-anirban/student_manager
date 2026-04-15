@@ -140,13 +140,14 @@ export default function AdminDashboard() {
     const key = `${col}-${id}`;
     setApproving((p) => ({ ...p, [key]: true }));
     try {
-      await supabase
+      const { error: updateError } = await supabase
         .from(col)
         .update({ status: "declined", declinedAt: new Date().toISOString() })
         .eq("id", id);
+      if (updateError) throw updateError;
       await fetchRequests();
     } catch (e) {
-      setError(e.message);
+      setError("Failed to decline: " + (e.message || "Unknown error"));
     } finally {
       setApproving((p) => ({ ...p, [key]: false }));
     }

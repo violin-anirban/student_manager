@@ -59,6 +59,7 @@ const connections = [
 const skipTierLinks = [
   { from: 'skdc', to: 'anirban', offsetX: -100 },  // SKDC → Anirban
   { from: 'vgj',  to: 'brc',    offsetX: 50 },    // VGJ → BRC
+  { from: 'asr',  to: 'ss',     offsetX: 10 },    // ASR → SS
 ];
 
 const GOLD = '#b8922a';
